@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { postLoginService } from "../../services/auth_services";
-import { useNavigate } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -69,6 +69,7 @@ export const Login = () => {
           Ingresar
         </button>
       </form>
+      <Link to="/register">Nuevo Cliente</Link>
     </div>
   );
 };

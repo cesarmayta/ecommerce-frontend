@@ -7,6 +7,7 @@ import { Protected } from "./pages/protected/protected";
 import { Login } from "./pages/login/login";
 import "./index.css";
 import { Order } from "./pages/order/order";
+import { Register } from "./pages/register/register";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/order",
     element: <Order />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
   },
 ]);
 
