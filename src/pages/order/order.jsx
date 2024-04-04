@@ -3,8 +3,10 @@ import { isAuthenticated } from "../../helpers/auth";
 import {getUserProfile,getClientProfileByUserId} from '../../services/auth_services';
 import { useState } from "react";
 import { postNewOrder } from "../../services/order_services";
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 export const Order = () => {
+  const [newOrder,setNewOrder] = useState({})
   const [clientId,setClientId] = useState(0)
   const [firstName,setFirstName] = useState('')
   const [lastName,setLastName] = useState('')
@@ -16,6 +18,11 @@ export const Order = () => {
   );
   const total = cart.reduce((acc, product) => acc + product.total, 0);
 
+  const initialOptions = {
+    clientId: "AUgIpJt4Ub-dYuWLY9db_9DZDWpUXA-0hgPxFD39bt8kg9w-7ACDhFbSTZnTyFpTW0zKsVSljKyudy97",
+    currency: "USD",
+    intent: "capture",
+  };
 
   if (!isAuthenticated()) {
     return <Navigate to="/login" />;
@@ -42,12 +49,17 @@ export const Order = () => {
     postNewOrder(clientId).then((data) => {
       if (!data) {
         alert("hubo un error");
-        console.log(data)
         return;
       }
+      console.log("orden registrada : ",data)
+      setNewOrder(data)
       alert("pedido registrado!!!");
     });
   };
+
+  const aprobarPago = () =>{
+    alert("pago aprobado")
+  }
   
 
   return(
@@ -95,6 +107,34 @@ export const Order = () => {
         </tbody>
       </table>
       <span>total : {total}</span><br/>
+      {Object.keys(newOrder).length !== 0 && (
+        <span>PEDIDO: {newOrder.code}</span>
+      )}
+      <PayPalScriptProvider options={initialOptions}>
+        <PayPalButtons 
+        createOrder={(data, actions) => {
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: total,
+                },
+                invoice_number: newOrder.code // Pasar el número de factura
+              },
+            ],
+          });
+        }}
+        onApprove={(data, actions) => {
+          return actions.order.capture().then(function(details) {
+            console.log("resultado del pedido : ",details)
+            const invoiceNumber = details.purchase_units[0].invoice_number; // Obtener el número de factura
+            alert('se pago el pedido ' + invoiceNumber);
+            // Manejar el número de factura según sea necesario
+          });
+        }}
+        
+        />
+      </PayPalScriptProvider>
     </>
   )
 };
